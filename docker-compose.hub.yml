@@ -1,0 +1,47 @@
+services:
+  app:
+    image: acrio/azpanel:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - APP_DEBUG=false
+      - APP_NAME=AzPanel
+      - DB_HOSTNAME=db
+      - DB_DATABASE=azpanel
+      - DB_USERNAME=azpanel
+      - DB_PASSWORD=${DB_PASSWORD:-azpanel123}
+      - DB_PORT=3306
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - runtime_data:/var/www/html/runtime
+    networks:
+      - azpanel
+
+  db:
+    image: acrio/azpanel-db:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: azpanel
+      MYSQL_USER: azpanel
+      MYSQL_PASSWORD: ${DB_PASSWORD:-azpanel123}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "azpanel", "-p${DB_PASSWORD:-azpanel123}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - azpanel
+
+volumes:
+  db_data:
+  runtime_data:
+
+networks:
+  azpanel:
+    driver: bridge

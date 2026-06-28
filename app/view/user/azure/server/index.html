@@ -1,511 +1,161 @@
 {include file="../app/view/user/header.html" title="Azure 虚拟机列表" /}
 
-<div class="mdui-container-fluid">
-    <div class="mdui-row">
-        <div
-            class="mdui-col-xs-12 mdui-col-md-{:think\\facade\\Env::get('theme.CARD_WIDTH')} mdui-col-offset-md-{:think\\facade\\Env::get('theme.CARD_RIGHT_OFFSET')}">
-            <div class="mdui-container-fluid">
-                <p style="color: #3F51B5; font-size: 34px">Azure 虚拟机列表</p>
-            </div>
-
-            <div class="mdui-typo">
-                <p>你可以在这里查看所有 Azure 账户下的虚拟机列表</p>
-            </div>
-
-            <div class="card-body mdui-table-fluid-fixed mdui-m-t-2">
-                <table class="mdui-table" style="border: none;">
-                    <thead>
-                        <tr>
-                            <th>操作</th>
-                            <th>#</th>
-                            <th>名称</th>
-                            <th>备注</th>
-                            <th>状态</th>
-                            <th>地域</th>
-                            <th>规格</th>
-                            <th>IP</th>
-                            <th>系统版本</th>
-                            <th>资源组</th>
-                            <th>归属账户</th>
-                            <th>硬盘大小</th>
-                            <th>添加时间</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {volist name="servers" id="server"}
-                        <tr id="{$server.vm_id}" class="hid">
-                            <td>
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-ripple mdui-color-blue-grey"
-                                    mdui-menu="{target: '#action-{$server.id}', fixed: true}">操作</button>
-                                <ul class="mdui-menu" id="action-{$server.id}">
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="start(this)" data-id="{$server.vm_id}">
-                                            <i
-                                                class="mdui-menu-item-icon mdui-icon material-icons">power_settings_new</i>启动
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="stop(this)" data-id="{$server.vm_id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">flash_off</i>停止
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="restart(this)" data-id="{$server.vm_id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">refresh</i>重新启动
-                                        </a>
-                                    </li>
-
-                                    <li class="mdui-divider"></li>
-
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" href="/user/server/azure/{$server.id}"
-                                            target="view_window">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">memory</i>虚拟机详情
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="remark(this)" data-id="{$server.vm_id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">edit</i>修改备注
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" data-clipboard-target="#ip-{$server.id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">content_copy</i>复制
-                                            IPv4
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="change(this)" data-id="{$server.vm_id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">repeat_one</i>更换
-                                            IPv4
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="check(this)" data-ip="{$server.ip_address}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">network_check</i>检查
-                                            IPv4
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="refresh(this)" data-id="{$server.vm_id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">autorenew</i>刷新状态
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="remove(this)" data-id="{$server.vm_id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">deleted</i>移出列表
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="destroy(this)" data-id="{$server.vm_id}">
-                                            <i
-                                                class="mdui-menu-item-icon mdui-icon material-icons">delete_forever</i>销毁虚拟机
-                                        </a>
-                                    </li>
-                                </ul>
-                            </td>
-                            <td>{$count--}</td>
-                            <td>{$server.name}</td>
-                            <td>{$server.user_remark ?? 'null'}</td>
-                            <td>
-                                {:str_replace('PowerState/', '', $server.status)}
-                            </td>
-                            <td>{$server.location}</td>
-                            <td>{:str_replace('Standard_', '', $server.vm_size)}</td>
-                            <td id="ip-{$server.id}">{$server.ip_address}</td>
-                            <td class="disable-replication"
-                                mdui-tooltip="{content: '{$server.os_sku}', position: 'top'}">
-                                {$server.os_offer}
-                            </td>
-                            <td>{$server.resource_group}</td>
-                            <td>{$server.account_email}</td>
-                            <td>{$server.disk_size}</td>
-                            <td>{:date('Y-m-d H:i:s', $server.updated_at)}</td>
-                        </tr>
-                        {/volist}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mdui-dialog" id="search" style="overflow: visible">
-                <div class="mdui-dialog-content" style="overflow: visible">
-                    <div class="mdui-col-sm-12 mdui-col-md-4">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">flag</i>
-                            <label class="mdui-textfield-label">名称</label>
-                            <input class="mdui-textfield-input" id="s_name">
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-4">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">bookmark</i>
-                            <label class="mdui-textfield-label">备注</label>
-                            <input class="mdui-textfield-input" id="s_mark">
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-4">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">public</i>
-                            <label class="mdui-textfield-label">公网地址</label>
-                            <input class="mdui-textfield-input" id="s_public">
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-12">
-                        <div class="mdui-col-md-6 mdui-m-t-2">
-                            地区：<select id="s_location" class="mdui-select" mdui-select>
-                                <option value="all">不限</option>
-                                {volist name="locations" id="location"}
-                                <option value="{$key}">{$location}</option>
-                                {/volist}
-                            </select>
-                        </div>
-                        <div class="mdui-col-md-3 mdui-m-t-2">
-                            规格：<select id="s_size" class="mdui-select" mdui-select>
-                                <option value="all">不限</option>
-                                {volist name="sizes" id="size"}
-                                <option value="{$key}">{:str_replace('Standard_', '', $key)}</option>
-                                {/volist}
-                            </select>
-                        </div>
-                        <div class="mdui-col-md-3 mdui-m-t-2">
-                            状态：<select id="s_status" class="mdui-select" mdui-select>
-                                <option value="all">不限</option>
-                                <option value="PowerState/running">运行中</option>
-                                <option value="PowerState/stopped">已停止</option>
-                                <option value="PowerState/deallocated">已分离</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-12">
-                        <p></p>
-                    </div>
-                </div>
-                <div class="mdui-dialog-actions">
-                    <button id="cancel-search" class="mdui-btn mdui-ripple" mdui-dialog-close>取消</button>
-                    <button id="submit-search" class="mdui-btn mdui-ripple" mdui-dialog-confirm>搜索</button>
-                </div>
-            </div>
-
-            <a id="search-button" class="mdui-fab mdui-color-theme-accent mdui-ripple mdui-fab-fixed"
-                mdui-dialog="{target: '#search'}">
-                <i class="mdui-icon material-icons">search</i>
-            </a>
-
-            <div class="mdui-m-t-2"></div>
-
-        </div>
-    </div>
-    <br />
+<div class="mb-4 flex flex-wrap gap-2">
+  <a href="/user/server/azure/create" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    创建虚拟机
+  </a>
+  <button id="btn-search" class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-xl border border-gray-300 transition-colors">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    搜索过滤
+  </button>
 </div>
-</body>
+
+<div id="search-panel" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <input id="s_name" type="text" placeholder="名称" class="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    <input id="s_mark" type="text" placeholder="备注" class="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    <input id="s_public" type="text" placeholder="IP 地址" class="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    <select id="s_location" class="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="all">全部地区</option>
+      {volist name="locations" id="location"}
+      <option value="{$key}">{$location}</option>
+      {/volist}
+    </select>
+    <select id="s_status" class="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="all">全部状态</option>
+      <option value="PowerState/running">运行中</option>
+      <option value="PowerState/stopped">已停止</option>
+      <option value="PowerState/deallocated">已分离</option>
+    </select>
+    <button id="btn-do-search" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors">搜索</button>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">名称</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">备注</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">状态</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">地区</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">规格</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">IP</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">系统</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">操作</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {volist name="servers" id="server"}
+        <tr id="vm-{$server.vm_id}" class="hover:bg-gray-50 transition-colors vm-row">
+          <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{$server.name}</td>
+          <td class="px-4 py-3 text-gray-500 text-xs">{$server.user_remark ?? '—'}</td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            {if $server.status == 'PowerState/running'}
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>运行中</span>
+            {elseif $server.status == 'PowerState/stopped' or $server.status == 'PowerState/deallocated'}
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700"><span class="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span>{:str_replace('PowerState/','',$server['status'])}</span>
+            {else}
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700"><span class="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block"></span>{:str_replace('PowerState/','',$server['status'])}</span>
+            {/if}
+          </td>
+          <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">{$server.location}</td>
+          <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">{:str_replace('Standard_','',$server['vm_size'])}</td>
+          <td class="px-4 py-3">
+            <span id="ip-{$server.id}" class="font-mono text-xs text-gray-700">{$server.ip_address}</span>
+            <button onclick="copyText('{$server.ip_address}')" class="ml-1 text-gray-300 hover:text-gray-500">
+              <svg class="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            </button>
+          </td>
+          <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">{$server.os_offer}</td>
+          <td class="px-4 py-3">
+            <div class="flex flex-wrap gap-1">
+              <button onclick="vmStart('{$server.vm_id}')" class="px-2 py-1 text-xs bg-green-50 hover:bg-green-100 text-green-700 rounded-lg">启动</button>
+              <button onclick="vmStop('{$server.vm_id}')" class="px-2 py-1 text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-lg">停止</button>
+              <button onclick="vmRestart('{$server.vm_id}')" class="px-2 py-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg">重启</button>
+              <a href="/user/server/azure/{$server.id}" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg">详情</a>
+              <button onclick="vmRemark('{$server.vm_id}')" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg">备注</button>
+              <button onclick="vmChangeIP('{$server.vm_id}')" class="px-2 py-1 text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg">换IP</button>
+              <button onclick="vmRefresh('{$server.vm_id}')" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg">刷新</button>
+              <button onclick="vmRemove('{$server.vm_id}')" class="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg">移出</button>
+              <button onclick="vmDestroy('{$server.vm_id}')" class="px-2 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded-lg">销毁</button>
+            </div>
+          </td>
+        </tr>
+        {/volist}
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <script>
-    let clipboard = new ClipboardJS('.mdui-ripple')
-    clipboard.on('success', (e) => {
-        mdui.snackbar({
-            message: "复制成功"
-        })
-    });
+function copyText(t){ navigator.clipboard.writeText(t).then(function(){ toast('已复制','success'); }); }
 
-    $('#submit-search').click(function () {
-        $.ajax({
-            method: 'POST',
-            url: "/user/server/azure/search",
-            data: {
-                s_name: $('#s_name').val(),
-                s_mark: $('#s_mark').val(),
-                s_public: $('#s_public').val(),
-                s_location: $('#s_location').val(),
-                s_size: $('#s_size').val(),
-                s_status: $('#s_status').val(),
-            },
-            dataType: "json",
-            success: function (data) {
-                $("tr[class='hid']").hide();
-                for (var i = 0; i < data.result.length; i++) {
-                    $("tr[id='" + data.result[i].vm_id + "']").show();
-                }
-                // console.log(data.sql);
-            }
-        });
-    });
-
-    function getProgress() {
-        $.ajax({
-            method: 'GET',
-            url: "/user/progress/" + uuid,
-            dataType: "json",
-            success: function (data) {
-                var width = data.schedule + '%';
-                $('.mdui-progress-determinate').css('width', width);
-                $('#hint').replaceWith("<p id=\"hint\">" + data.current + "</p>");
-            }
-        });
-    }
-
-    function guid() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-
-    function change(that) {
-        let id = $(that).data('id');
-        mdui.confirm('此操作需重新启动虚拟机', '更换确认',
-            function () {
-                var load = new mdui.alert('<p id=\"hint\">准备中</p><div class=\"mdui-progress\"><div class=\"mdui-progress-determinate\"></div></div>', '进行中');
-                uuid = guid();
-
-                $.ajax({
-                    method: 'POST',
-                    url: "/user/server/azure/change/" + id,
-                    data: {
-                        task_uuid: uuid,
-                    },
-                    dataType: "json",
-                    beforeSend: function () {
-                        setInterval(getProgress, 1000)
-                    },
-                    success: function (data) {
-                        load.close();
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/server/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消",
-            }
-        );
-    };
-
-    function check(that) {
-        let ip = $(that).data('ip');
-        mdui.confirm('检测结果可能与实际情况不符，如提示异常，建议多试几次', '检测须知',
-            function () {
-                var load = new mdui.alert('<div class=\"mdui-progress\"><div class=\"mdui-progress-indeterminate\"></div></div>', '进行中');
-                $.ajax({
-                    method: 'POST',
-                    url: "/user/server/azure/check/" + ip,
-                    dataType: "json",
-                    success: function (data) {
-                        load.close();
-                        mdui.alert(data.content, data.title);
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消",
-            }
-        );
-    };
-
-    function remove(that) {
-        let id = $(that).data('id');
-        mdui.confirm('确认从列表中移出此虚拟机？', '移出确认',
-            function () {
-                $.ajax({
-                    method: 'DELETE',
-                    url: "/user/server/azure/remove/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            $(that).closest('tr').remove();
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function destroy(that) {
-        let id = $(that).data('id');
-        mdui.prompt('输入 yes 销毁其所归属的资源组中的所有资源', '销毁确认',
-            function (value) {
-                if (value == 'yes') {
-                    $.ajax({
-                        method: 'DELETE',
-                        url: "/user/server/azure/destroy/" + id,
-                        dataType: "json",
-                        success: function (data) {
-                            if (data.status == '0') {
-                                mdui.alert(data.content, data.title);
-                            } else {
-                                mdui.alert(data.content, data.title);
-                                setTimeout("window.location = '/user/server/azure'", 1500);
-                            }
-                        }
-                    });
-                } else {
-                    mdui.alert('为避免误操作，请按提示在文本框中输入 yes', '销毁失败');
-                }
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function refresh(that) {
-        let id = $(that).data('id');
-        mdui.confirm('确认刷新此虚拟机运行状态么？', '刷新确认',
-            function () {
-                $.ajax({
-                    method: 'POST',
-                    url: "/user/server/azure/refresh/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/server/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function start(that) {
-        let id = $(that).data('id');
-        mdui.confirm('确认启动此虚拟机么？', '启动确认',
-            function () {
-                $.ajax({
-                    method: 'PATCH',
-                    url: "/user/server/azure/start/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/server/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function stop(that) {
-        let id = $(that).data('id');
-        mdui.confirm('确认停止此虚拟机么？', '停止确认',
-            function () {
-                $.ajax({
-                    method: 'PATCH',
-                    url: "/user/server/azure/stop/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/server/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function restart(that) {
-        let id = $(that).data('id');
-        mdui.confirm('确认重新启动此虚拟机么？', '重启确认',
-            function () {
-                $.ajax({
-                    method: 'PATCH',
-                    url: "/user/server/azure/restart/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/server/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function remark(that) {
-        let id = $(that).data('id');
-        mdui.prompt('请输入新备注', '修改备注',
-            function (remark) {
-                $.ajax({
-                    method: 'POST',
-                    url: "/user/server/azure/remark/" + id,
-                    data: {
-                        id: id,
-                        remark: remark
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/server/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    $("td:contains('running')").css("color", "green");
-    $("td:contains('starting')").css("color", "orange");
-    $("td:contains('stopping')").css("color", "orange");
-    $("td:contains('stopped')").css("color", "red");
-    $("td:contains('deallocated')").css("color", "red");
-    $("td:contains('null')").css("font-style", "italic");
+function vmStart(id){
+  azConfirm('确认启动此虚拟机？','启动确认').then(function(){
+    var prog=azProgress('启动中');
+    $.ajax({method:'PATCH',url:'/user/server/azure/start/'+id,dataType:'json',
+      success:function(d){prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1200);}});
+  }).catch(function(){});
+}
+function vmStop(id){
+  azConfirm('确认停止此虚拟机？','停止确认').then(function(){
+    var prog=azProgress('停止中');
+    $.ajax({method:'PATCH',url:'/user/server/azure/stop/'+id,dataType:'json',
+      success:function(d){prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1200);}});
+  }).catch(function(){});
+}
+function vmRestart(id){
+  azConfirm('确认重启此虚拟机？','重启确认').then(function(){
+    var prog=azProgress('重启中');
+    $.ajax({method:'PATCH',url:'/user/server/azure/restart/'+id,dataType:'json',
+      success:function(d){prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1200);}});
+  }).catch(function(){});
+}
+function vmRemark(id){
+  azPrompt('请输入新备注','修改备注').then(function(remark){
+    $.ajax({method:'POST',url:'/user/server/azure/remark/'+id,data:{remark:remark},dataType:'json',
+      success:function(d){toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1200);}});
+  }).catch(function(){});
+}
+function vmChangeIP(id){
+  azConfirm('更换IP需要重启虚拟机，确认继续？','更换IP确认').then(function(){
+    var prog=azProgress('更换IP中'); var u=guid();
+    var cycle=setInterval(function(){$.ajax({method:'GET',url:'/user/progress/'+u,dataType:'json',success:function(d){prog.setProgress(d.schedule);prog.setHint(d.current);}});},1000);
+    $.ajax({method:'POST',url:'/user/server/azure/change/'+id,data:{task_uuid:u},dataType:'json',
+      success:function(d){clearInterval(cycle);prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1000);}});
+  }).catch(function(){});
+}
+function vmRefresh(id){
+  azConfirm('确认刷新虚拟机状态？','刷新确认').then(function(){
+    $.ajax({method:'POST',url:'/user/server/azure/refresh/'+id,dataType:'json',
+      success:function(d){toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1000);}});
+  }).catch(function(){});
+}
+function vmRemove(id){
+  azDanger('从列表移出此虚拟机（不删除云上资源）？','移出确认','移出','取消').then(function(){
+    $.ajax({method:'DELETE',url:'/user/server/azure/remove/'+id,dataType:'json',
+      success:function(d){toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')$('#vm-'+id).fadeOut(300,function(){$(this).remove();});}});
+  }).catch(function(){});
+}
+function vmDestroy(id){
+  azPrompt('输入 yes 确认销毁（将删除云上所有资源）','销毁确认').then(function(v){
+    if(v!=='yes'){ toast('请输入 yes 确认','warning'); return; }
+    var prog=azProgress('销毁中');
+    $.ajax({method:'DELETE',url:'/user/server/azure/destroy/'+id,dataType:'json',
+      success:function(d){prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1000);}});
+  }).catch(function(){});
+}
+$('#btn-search').on('click',function(){$('#search-panel').toggleClass('hidden');});
+$('#btn-do-search').on('click',function(){
+  $.ajax({method:'POST',url:'/user/server/azure/search',
+    data:{s_name:$('#s_name').val(),s_mark:$('#s_mark').val(),s_public:$('#s_public').val(),s_location:$('#s_location').val(),s_status:$('#s_status').val()},
+    dataType:'json',
+    success:function(data){$('.vm-row').hide();for(var i=0;i<data.result.length;i++)$('#vm-'+data.result[i].vm_id).show();}
+  });
+});
 </script>
-{include file="../app/view/user/footer.html" /}
 
-</html>
+{include file="../app/view/user/footer.html" /}

@@ -1,34 +1,93 @@
-<script>
-    var $ = mdui.$;
-    $('#logout').on('click', function () {
-        mdui.confirm('你确认要登出后台么', '登出确认',
-            function () {
-                $.ajax({
-                    method: 'POST',
-                    url: "/logout",
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '1') {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/login'", 1500);
-                        }
-                    }
-                });
-            },
+    </div><!-- /p-8 -->
 
-            function () {
-            },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    });
+    <div class="px-6 lg:px-8 pb-6 text-center text-xs text-gray-400">
+      {:app\model\Config::obtain('custom_text')}
+    </div>
+  </main>
+</div><!-- /#main -->
+
+<script>
+/* ── utilities ── */
+function toast(msg, type) {
+  var c = {success:'bg-green-500',error:'bg-red-500',info:'bg-blue-500',warning:'bg-yellow-500'};
+  var el=$('<div class="flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm shadow-lg cursor-pointer '+(c[type]||c.info)+'">'+msg+'</div>');
+  el.on('click',function(){el.remove();});
+  $('#toast-container').append(el);
+  setTimeout(function(){el.fadeOut(300,function(){el.remove();});},4000);
+}
+
+function _modal(html){
+  var id='m'+Date.now();
+  $('#modal-container').append('<div id="'+id+'" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">'+html+'</div>');
+  return id;
+}
+function closeModal(id){$('#'+id).remove();}
+
+function azAlert(content,title){
+  return new Promise(function(res){
+    var id=_modal('<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm"><div class="px-6 pt-6 pb-2"><h3 class="text-base font-semibold text-gray-900 mb-2">'+(title||'提示')+'</h3><p class="text-sm text-gray-600">'+content+'</p></div><div class="px-6 py-4 flex justify-end"><button class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition" onclick="closeModal(\''+id+'\')">确定</button></div></div>');
+    $('#'+id+' button').on('click',function(){res();});
+  });
+}
+
+function azConfirm(content,title,okText,cancelText){
+  return new Promise(function(res,rej){
+    var id=_modal('<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm"><div class="px-6 pt-6 pb-2"><h3 class="text-base font-semibold text-gray-900 mb-2">'+(title||'确认')+'</h3><p class="text-sm text-gray-600">'+content+'</p></div><div class="px-6 py-4 flex justify-end gap-3"><button id="cancel-'+id+'" class="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition">'+(cancelText||'取消')+'</button><button id="ok-'+id+'" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition">'+(okText||'确定')+'</button></div></div>');
+    $('#cancel-'+id).on('click',function(){closeModal(id);rej();});
+    $('#ok-'+id).on('click',function(){closeModal(id);res();});
+  });
+}
+
+function azDanger(content,title,okText,cancelText){
+  return new Promise(function(res,rej){
+    var id=_modal('<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm"><div class="px-6 pt-6 pb-2"><h3 class="text-base font-semibold text-gray-900 mb-2">'+(title||'确认')+'</h3><p class="text-sm text-gray-600">'+content+'</p></div><div class="px-6 py-4 flex justify-end gap-3"><button id="cancel-'+id+'" class="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition">'+(cancelText||'取消')+'</button><button id="ok-'+id+'" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition">'+(okText||'确定')+'</button></div></div>');
+    $('#cancel-'+id).on('click',function(){closeModal(id);rej();});
+    $('#ok-'+id).on('click',function(){closeModal(id);res();});
+  });
+}
+
+function azPrompt(content,title,okText,cancelText){
+  return new Promise(function(res,rej){
+    var iid='pi'+Date.now();
+    var id=_modal('<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm"><div class="px-6 pt-6 pb-2"><h3 class="text-base font-semibold text-gray-900 mb-3">'+(title||'输入')+'</h3><p class="text-sm text-gray-600 mb-3">'+content+'</p><input id="'+iid+'" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" type="text"/></div><div class="px-6 py-4 flex justify-end gap-3"><button id="cancel-'+id+'" class="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition">'+(cancelText||'取消')+'</button><button id="ok-'+id+'" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition">'+(okText||'确定')+'</button></div></div>');
+    setTimeout(function(){$('#'+iid).focus();},50);
+    $('#cancel-'+id).on('click',function(){closeModal(id);rej();});
+    $('#ok-'+id).on('click',function(){var v=$('#'+iid).val();closeModal(id);res(v);});
+  });
+}
+
+function azProgress(title){
+  var hid='ph'+Date.now(); var pid='pp'+Date.now(); var mid='pm'+Date.now();
+  var id=_modal('<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"><h3 class="text-base font-semibold text-gray-900 mb-4">'+(title||'进行中')+'</h3><p id="'+hid+'" class="text-sm text-gray-600 mb-3">准备中...</p><div class="bg-gray-200 rounded-full h-2"><div id="'+pid+'" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width:0%"></div></div></div>');
+  return {
+    id:id,
+    setHint:function(t){$('#'+hid).text(t);},
+    setProgress:function(p){$('#'+pid).css('width',p+'%');},
+    close:function(){closeModal(id);}
+  };
+}
+
+function guid(){
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c=='x'?r:(r&0x3|0x8);return v.toString(16);});
+}
+
+/* ── sidebar mobile toggle ── */
+$('#sidebar-toggle').on('click',function(){$('#sidebar').toggleClass('open');$('#sidebar-overlay').toggleClass('hidden');});
+$('#sidebar-overlay').on('click',function(){$('#sidebar').removeClass('open');$('#sidebar-overlay').addClass('hidden');});
+
+/* ── logout ── */
+$('#logout-btn').on('click',function(){
+  azConfirm('确认退出登录？','退出确认','退出','取消').then(function(){
+    $.ajax({method:'POST',url:'/logout',dataType:'json',success:function(d){if(d.status=='1'){toast('已退出','success');setTimeout(function(){location.href='/login';},800);}else{toast(d.content,'error');}}});
+  }).catch(function(){});
+});
+
+/* ── active nav link ── */
+var path=location.pathname;
+$('.sidebar-link').each(function(){if($(this).attr('href')&&path.startsWith($(this).attr('href'))&&$(this).attr('href')!='/'){$(this).addClass('active');}});
+if(path==='/user'||path==='/user/')$('a[href="/user"]').addClass('active');
 </script>
 
-<div class="mdui-typo" style="position: static; left: 0px; bottom: 0px; width: 100%">
-    <div class="mdui-m-y-1" style="margin: 0 auto; text-align: center">
-        {:app\\model\\Config::obtain('custom_text')}
-    </div>
-</div>
-{:app\\model\\Config::obtain('custom_script')}
+{:app\model\Config::obtain('custom_script')}
+</body>
+</html>

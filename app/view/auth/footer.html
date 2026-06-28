@@ -1,6 +1,14 @@
-<div class="mdui-typo" style="position: fixed; left: 0px; bottom: 0px; width: 100%">
-    <div class="mdui-m-y-1" style="margin: 0 auto; text-align: center">
-        {:app\\model\\Config::obtain('custom_text')}
-    </div>
-</div>
-{:app\\model\\Config::obtain('custom_script')}
+  </div><!-- /card -->
+</div><!-- /max-w-md -->
+
+<script>
+function toast(msg, type) {
+  var colors = { success:'bg-green-500', error:'bg-red-500', info:'bg-blue-500', warning:'bg-yellow-500' };
+  var cls = colors[type] || colors.info;
+  var el = $('<div class="toast flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm shadow-lg ' + cls + '">' + msg + '</div>');
+  $('#toast-container').append(el);
+  setTimeout(function(){ el.fadeOut(300, function(){ el.remove(); }); }, 3500);
+}
+</script>
+</body>
+</html>

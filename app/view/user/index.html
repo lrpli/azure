@@ -1,41 +1,26 @@
 {include file="../app/view/user/header.html" title="用户中心" /}
 
-<div class="mdui-container-fluid">
-    <div class="mdui-row">
-        <div
-            class="mdui-col-xs-12 mdui-col-md-{:env('theme.CARD_WIDTH')} mdui-col-offset-md-{:env('theme.CARD_RIGHT_OFFSET')}">
-            <div class="mdui-container-fluid">
-                <p style="color: #3F51B5; font-size: 34px">用户中心</p>
-            </div>
-
-            <div class="mdui-typo">
-                <p>下方是管理员发布的所有公告</p>
-            </div>
-
-            <div class="mdui-row">
-                {volist id="ann" name="anns"}
-                <div class="mdui-col-md-6 mdui-col-sm-12 mdui-m-t-2">
-                    <div class="mdui-card">
-                        <div class="mdui-card-content">
-                            <p class="mdui-float-right" style="color: #3F51B5; font-size: 20px">#{$ann.id}</p>
-                            <p style="color: #3F51B5; font-size: 20px">{$ann.title}</p>
-                            <p style="color: #3F51B5; font-size: 14px">{:date('Y-m-d H:i:s', $ann.created_at)}</p>
-                            <div class="mdui-typo">
-                                <p>{$ann.content | raw}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/volist}
-            </div>
-
-            <div class="mdui-m-t-2"></div>
-
-        </div>
+{if !empty($anns)}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {volist name="anns" id="ann"}
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div class="flex items-start justify-between mb-2">
+      <h3 class="font-semibold text-gray-900">{$ann.title}</h3>
+      <span class="text-xs text-gray-400 ml-3 flex-shrink-0">{:date('Y-m-d', $ann.created_at)}</span>
     </div>
+    <div class="text-sm text-gray-600 leading-relaxed">{$ann.content | raw}</div>
+  </div>
+  {/volist}
 </div>
+{else}
+<div class="flex flex-col items-center justify-center py-20 text-center">
+  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+    <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+    </svg>
+  </div>
+  <p class="text-gray-500 text-sm">暂无公告</p>
+</div>
+{/if}
 
-</body>
 {include file="../app/view/user/footer.html" /}
-
-</html>

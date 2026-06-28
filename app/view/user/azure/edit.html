@@ -1,131 +1,60 @@
 {include file="../app/view/user/header.html" title="编辑账户" /}
 
-<div class="mdui-container-fluid">
-    <div class="mdui-row">
-        <div
-            class="mdui-col-xs-12 mdui-col-md-{:think\\facade\\Env::get('theme.CARD_WIDTH')} mdui-col-offset-md-{:think\\facade\\Env::get('theme.CARD_RIGHT_OFFSET')}">
-            <div class="mdui-container-fluid">
-                <p style="color: #3F51B5; font-size: 34px">编辑账户</p>
-            </div>
-
-            <div class="mdui-typo">
-                <p>你可以在这里编辑此账户的部分信息</p>
-            </div>
-
-            <div class="mdui-card mdui-m-t-2" style="overflow: visible">
-                <div class="mdui-card-content mdui-container">
-                    <div class="mdui-col-sm-12 mdui-col-md-6">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">mail</i>
-                            <label class="mdui-textfield-label">登录邮箱</label>
-                            <textarea class="mdui-textfield-input" id="az_email" required>{$account.az_email}</textarea>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-6">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">lock</i>
-                            <label class="mdui-textfield-label">登录密码（选填）</label>
-                            <textarea class="mdui-textfield-input" id="az_passwd">{$account.az_passwd}</textarea>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-6">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">bookmark</i>
-                            <label class="mdui-textfield-label">备注</label>
-                            <textarea class="mdui-textfield-input" id="user_mark">{$account.user_mark}</textarea>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-6">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">apps</i>
-                            <label class="mdui-textfield-label">app_id</label>
-                            <textarea class="mdui-textfield-input" disabled>{$az_api.appId}</textarea>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-6">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">location_city</i>
-                            <label class="mdui-textfield-label">tenant_id</label>
-                            <textarea class="mdui-textfield-input" disabled>{$az_api.tenant}</textarea>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-6">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">subscriptions</i>
-                            <label class="mdui-textfield-label">subscription_id</label>
-                            <textarea class="mdui-textfield-input" disabled>{$account.az_sub_id}</textarea>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-12">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">vpn_key</i>
-                            <label class="mdui-textfield-label">password</label>
-                            <textarea class="mdui-textfield-input" disabled>{$az_api.password}</textarea>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-12">
-                        <p style="color: #3F51B5; font-size: 18px">操作</p>
-                        <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-blue-grey"
-                            data-clipboard-text="{$share}">复制API参数</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mdui-card mdui-m-t-2">
-                <div class="mdui-card-actions">
-                    <button class="mdui-btn mdui-btn-block mdui-color-indigo mdui-ripple mdui-btn-raised"
-                        id="update">修改</button>
-                </div>
-            </div>
-
-            <div class="mdui-m-t-2"></div>
-
-        </div>
+<div class="max-w-2xl">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">登录邮箱</label>
+        <textarea id="az_email" rows="2" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">{$account.az_email}</textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">登录密码 <span class="text-gray-400 font-normal">（选填）</span></label>
+        <textarea id="az_passwd" rows="2" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">{$account.az_passwd}</textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+        <textarea id="user_mark" rows="2" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">{$account.user_mark}</textarea>
+      </div>
     </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-100">
+      <p class="text-sm font-medium text-gray-700 mb-3">只读信息</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p class="text-gray-500 mb-1">App ID</p>
+          <p class="font-mono text-gray-700 break-all">{$az_api.appId}</p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p class="text-gray-500 mb-1">Tenant ID</p>
+          <p class="font-mono text-gray-700 break-all">{$az_api.tenant}</p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3 md:col-span-2">
+          <p class="text-gray-500 mb-1">Subscription ID</p>
+          <p class="font-mono text-gray-700 break-all">{$account.az_sub_id}</p>
+        </div>
+      </div>
+      <button id="copy-api" data-text="{$share}" class="mt-3 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors">
+        复制 API 参数
+      </button>
+    </div>
+
+    <button id="update-btn" class="mt-6 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">保存修改</button>
+  </div>
 </div>
-</body>
 
 <script>
-    let clipboard = new ClipboardJS('.mdui-color-blue-grey')
-    clipboard.on('success', (e) => {
-        mdui.snackbar({
-            message: "复制成功"
-        })
+$('#copy-api').on('click',function(){
+  navigator.clipboard.writeText($(this).data('text')).then(function(){ toast('复制成功','success'); });
+});
+$('#update-btn').on('click',function(){
+  azConfirm('确认更新此账户资料？','更新确认').then(function(){
+    $.ajax({method:'PUT',url:'/user/azure/{$account.id}',
+      data:{user_mark:$('#user_mark').val(),az_email:$('#az_email').val(),az_passwd:$('#az_passwd').val()},
+      dataType:'json',
+      success:function(d){toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.href='/user/azure';},1200);}
     });
-
-    var $ = mdui.$;
-    $('#update').on('click', function () {
-        mdui.confirm('确认更新此账户资料么', '更新确认',
-            function () {
-                $.ajax({
-                    method: 'PUT',
-                    url: "/user/azure/{$account.id}",
-                    data: {
-                        user_mark: $('#user_mark').val(),
-                        az_email: $('#az_email').val(),
-                        az_passwd: $('#az_passwd').val()
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        }
-                        else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () {
-            },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    });
+  }).catch(function(){});
+});
 </script>
-{include file="../app/view/user/footer.html" /}
 
-</html>
+{include file="../app/view/user/footer.html" /}

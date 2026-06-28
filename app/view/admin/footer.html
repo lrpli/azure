@@ -1,27 +1,93 @@
-<script>
-    var $ = mdui.$;
-    $('#logout').on('click', function () {
-        mdui.confirm('你确认要登出后台么', '登出确认',
-            function () {
-                $.ajax({
-                    method: 'POST',
-                    url: "/logout",
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '1') {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/login'", 1500);
-                        }
-                    }
-                });
-            },
+  </div><!-- /p-6 -->
+</main>
 
-            function () {
-            },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    });
+<script>
+/* Toast */
+function toast(msg, type) {
+  var colors = {success:'bg-green-500',error:'bg-red-500',info:'bg-blue-500',warning:'bg-yellow-500'};
+  var cls = colors[type] || colors.info;
+  var el = $('<div class="flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm shadow-lg '+cls+'">'+msg+'</div>');
+  $('#toast-container').append(el);
+  setTimeout(function(){ el.fadeOut(300, function(){ el.remove(); }); }, 3500);
+}
+
+/* Modal */
+function _modal(html) {
+  $('#modal-container').html('<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" id="modal-backdrop">'+html+'</div>');
+  $('#modal-backdrop').on('click', function(e){ if(e.target===this) closeModal(); });
+}
+function closeModal() { $('#modal-container').empty(); }
+
+function azAlert(content, title) {
+  return new Promise(function(resolve) {
+    _modal('<div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6"><h3 class="text-base font-semibold text-gray-900 mb-3">'+(title||'提示')+'</h3><p class="text-sm text-gray-600 mb-5">'+content+'</p><div class="flex justify-end"><button onclick="closeModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl">确定</button></div></div>');
+    $('#modal-container').one('click','button',function(){ closeModal(); resolve(); });
+  });
+}
+function azConfirm(content, title, okText, cancelText) {
+  return new Promise(function(resolve, reject) {
+    _modal('<div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6"><h3 class="text-base font-semibold text-gray-900 mb-3">'+(title||'确认')+'</h3><p class="text-sm text-gray-600 mb-5">'+content+'</p><div class="flex gap-2 justify-end"><button id="m-cancel" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl">'+(cancelText||'取消')+'</button><button id="m-ok" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl">'+(okText||'确定')+'</button></div></div>');
+    $('#m-ok').on('click', function(){ closeModal(); resolve(); });
+    $('#m-cancel').on('click', function(){ closeModal(); reject(); });
+  });
+}
+function azDanger(content, title, okText, cancelText) {
+  return new Promise(function(resolve, reject) {
+    _modal('<div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6"><h3 class="text-base font-semibold text-gray-900 mb-3">'+(title||'确认')+'</h3><p class="text-sm text-gray-600 mb-5">'+content+'</p><div class="flex gap-2 justify-end"><button id="m-cancel" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl">'+(cancelText||'取消')+'</button><button id="m-ok" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl">'+(okText||'确定')+'</button></div></div>');
+    $('#m-ok').on('click', function(){ closeModal(); resolve(); });
+    $('#m-cancel').on('click', function(){ closeModal(); reject(); });
+  });
+}
+function azPrompt(content, title) {
+  return new Promise(function(resolve, reject) {
+    _modal('<div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6"><h3 class="text-base font-semibold text-gray-900 mb-3">'+(title||'输入')+'</h3><p class="text-sm text-gray-600 mb-3">'+content+'</p><input id="m-input" type="text" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"/><div class="flex gap-2 justify-end"><button id="m-cancel" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl">取消</button><button id="m-ok" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl">确定</button></div></div>');
+    $('#m-input').focus();
+    $('#m-ok').on('click', function(){ var v=$('#m-input').val(); closeModal(); resolve(v); });
+    $('#m-cancel').on('click', function(){ closeModal(); reject(); });
+  });
+}
+function azProgress(title) {
+  var id = 'prog-'+Date.now();
+  _modal('<div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6" id="'+id+'"><h3 class="text-base font-semibold text-gray-900 mb-4">'+(title||'处理中')+'</h3><div class="w-full bg-gray-200 rounded-full h-2 mb-3"><div id="'+id+'-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width:0%"></div></div><p id="'+id+'-hint" class="text-xs text-gray-500">请稍候...</p></div>');
+  return {
+    id: id,
+    setHint: function(t){ $('#'+id+'-hint').text(t||''); },
+    setProgress: function(p){ $('#'+id+'-bar').css('width',(p||0)+'%'); },
+    close: function(){ closeModal(); }
+  };
+}
+function guid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+    var r=Math.random()*16|0, v=c=='x'?r:(r&0x3|0x8); return v.toString(16);
+  });
+}
+
+/* Sidebar */
+$('#sidebar-toggle').on('click', function(){
+  $('#sidebar').toggleClass('-translate-x-full');
+  $('#sidebar-overlay').toggleClass('hidden');
+});
+$('#sidebar-overlay').on('click', function(){
+  $('#sidebar').addClass('-translate-x-full');
+  $(this).addClass('hidden');
+});
+
+/* Active nav */
+var path = window.location.pathname;
+$('.nav-link').each(function(){
+  if($(this).attr('href') === path) {
+    $(this).addClass('bg-slate-700 text-white').removeClass('text-slate-300');
+  }
+});
+
+/* Logout */
+$('#logout-btn').on('click', function(){
+  azConfirm('确认退出管理后台？','退出确认').then(function(){
+    $.ajax({method:'POST',url:'/logout',dataType:'json',success:function(d){
+      if(d.status=='1') { toast(d.content,'success'); setTimeout(function(){location.href='/login';},1200); }
+    }});
+  }).catch(function(){});
+});
 </script>
+</body>
+</html>

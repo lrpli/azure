@@ -1,498 +1,108 @@
 {include file="../app/view/user/header.html" title="Azure 账户列表" /}
 
-<div class="mdui-container-fluid">
-    <div class="mdui-row">
-        <div
-            class="mdui-col-xs-12 mdui-col-md-{:think\\facade\\Env::get('theme.CARD_WIDTH')} mdui-col-offset-md-{:think\\facade\\Env::get('theme.CARD_RIGHT_OFFSET')}">
-            <div class="mdui-container-fluid">
-                <p style="color: #3F51B5; font-size: 34px">Azure 账户列表</p>
-            </div>
-
-            <div class="mdui-typo">
-                <p>你可以在这里查看所有 Azure 账户</p>
-            </div>
-
-            <div class="card-body mdui-table-fluid-fixed mdui-m-t-2">
-                <table class="mdui-table mdui-table-selectable" style="border: none;">
-                    <thead>
-                        <tr>
-                            <th>操作</th>
-                            <th>#</th>
-                            <th>账户</th>
-                            <th>备注</th>
-                            <th>状态</th>
-                            <th>类型</th>
-                            <th>虚拟机数</th>
-                            <th>添加时间</th>
-                            <th>状态更新时间</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {volist name="accounts" id="account"}
-                        <tr id="{$account.id}" data-id="{$account.id}" class="hid">
-                            <td>
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-ripple mdui-color-blue-grey"
-                                    mdui-menu="{target: '#action-{$account.id}', fixed: true}">操作</button>
-                                <ul class="mdui-menu" id="action-{$account.id}">
-                                    <li class="mdui-menu-item">
-                                        <a target="_blank" class="mdui-ripple" href="/user/azure/{$account.id}/edit">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">edit</i>编辑信息
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="refresh(this)" data-id="{$account.id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">refresh</i>刷新状态
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a target="_blank" class="mdui-ripple" href="/user/azure/{$account.id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">redeem</i>订阅详情
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a target="_blank" class="mdui-ripple"
-                                            href="/user/server/azure/create?id={$account.id}">
-                                            <i
-                                                class="mdui-menu-item-icon mdui-icon material-icons">create_new_folder</i>创建实例
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a target="_blank" class="mdui-ripple"
-                                            href="/user/azure/resources/{$account.id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">subject</i>资源列表
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="estimatedCost(this)" data-id="{$account.id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">attach_money</i>预估费用
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="update(this)" data-id="{$account.id}">
-                                            <i class="mdui-menu-item-icon mdui-icon material-icons">update</i>更新资源
-                                        </a>
-                                    </li>
-                                    <li class="mdui-menu-item">
-                                        <a class="mdui-ripple" onclick="remove(this)" data-id="{$account.id}">
-                                            <i
-                                                class="mdui-menu-item-icon mdui-icon material-icons">delete_forever</i>删除账户
-                                        </a>
-                                    </li>
-                                </ul>
-                            </td>
-                            <td>{$count--}</td>
-                            <td>{$account.az_email}</td>
-                            <td>{$account.user_mark}</td>
-                            <td>{$account.az_sub_status}</td>
-                            <td>{$account.az_sub_type}</td>
-                            <td>{:app\\model\\AzureServer::where('account_id', $account.id)->count()}</td>
-                            <td>{:date('Y-m-d H:i:s', $account.created_at)}</td>
-                            <td>{:date('Y-m-d H:i:s', $account.az_sub_updated_at)}</td>
-                        </tr>
-                        {/volist}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mdui-dialog" id="search" style="overflow: visible">
-                <div class="mdui-dialog-content" style="overflow: visible">
-                    <div class="mdui-col-sm-12 mdui-col-md-6">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">flag</i>
-                            <label class="mdui-textfield-label">账户名称</label>
-                            <input class="mdui-textfield-input" id="s_name">
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-6">
-                        <div class="mdui-textfield mdui-textfield-floating-label">
-                            <i class="mdui-icon material-icons">bookmark</i>
-                            <label class="mdui-textfield-label">备注</label>
-                            <input class="mdui-textfield-input" id="s_mark">
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-12">
-                        <div class="mdui-col-md-6 mdui-m-t-2">
-                            状态：<select id="s_status" class="mdui-select" mdui-select>
-                                <option value="all">不限</option>
-                                <option value="Enabled">Enabled</option>
-                                <option value="Warned">Warned</option>
-                                <option value="Disabled">Disabled</option>
-                            </select>
-                        </div>
-                        <div class="mdui-col-md-6 mdui-m-t-2">
-                            类型：<select id="s_type" class="mdui-select" mdui-select>
-                                <option value="all">不限</option>
-                                <option value="PayAsYouGo">PayAsYouGo</option>
-                                <option value="FreeTrial">FreeTrial</option>
-                                <option value="Students">Students</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-12">
-                        <p></p>
-                    </div>
-                </div>
-                <div class="mdui-dialog-actions">
-                    <button id="cancel-search" class="mdui-btn mdui-ripple" mdui-dialog-close>取消</button>
-                    <button id="submit-search" class="mdui-btn mdui-ripple" mdui-dialog-confirm>搜索</button>
-                </div>
-            </div>
-
-            <div class="mdui-dialog" id="refresh" style="overflow: visible">
-                <div class="mdui-dialog-content" style="overflow: visible">
-                    <h3>选择账户类型</h3>
-                    <div class="mdui-col-sm-12 mdui-col-md-3">
-                        <label class="mdui-checkbox">
-                            <input name="account_type" value="PayAsYouGo" type="checkbox" checked />
-                            <i class="mdui-checkbox-icon"></i>
-                            PayAsYouGo
-                        </label>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-3">
-                        <label class="mdui-checkbox">
-                            <input name="account_type" value="FreeTrial" type="checkbox" checked />
-                            <i class="mdui-checkbox-icon"></i>
-                            FreeTrial
-                        </label>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-3">
-                        <label class="mdui-checkbox">
-                            <input name="account_type" value="Students" type="checkbox" />
-                            <i class="mdui-checkbox-icon"></i>
-                            Students
-                        </label>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-3">
-                        <label class="mdui-checkbox">
-                            <input name="account_type" value="Unknown" type="checkbox" disabled checked />
-                            <i class="mdui-checkbox-icon"></i>
-                            Unknown
-                        </label>
-                    </div>
-                    <br /><br />
-                    <h3>选择刷新内容</h3>
-                    <div class="mdui-col-sm-12 mdui-col-md-3">
-                        <label class="mdui-checkbox">
-                            <input name="refresh_action" value="status" type="checkbox" disabled checked />
-                            <i class="mdui-checkbox-icon"></i>
-                            订阅状态
-                        </label>
-                    </div>
-                    <div class="mdui-col-sm-12 mdui-col-md-3">
-                        <label class="mdui-checkbox">
-                            <input name="refresh_action" value="resources" type="checkbox" />
-                            <i class="mdui-checkbox-icon"></i>
-                            账户资源
-                        </label>
-                    </div>
-                </div>
-                <div class="mdui-dialog-actions">
-                    <button id="cancel-refresh" class="mdui-btn mdui-ripple" mdui-dialog-close>取消</button>
-                    <button id="submit-refresh" class="mdui-btn mdui-ripple" mdui-dialog-confirm>执行</button>
-                </div>
-            </div>
-
-            <div class="mdui-container">
-                <div class="mdui-fab-wrapper" id="fab">
-                    <button class="mdui-fab mdui-ripple mdui-color-pink-accent">
-                        <i class="mdui-icon material-icons">build</i>
-                    </button>
-                    <div class="mdui-fab-dial">
-                        <button class="mdui-fab mdui-fab-mini mdui-ripple mdui-color-red"
-                            onclick="deletedAllDisabledAccount()">
-                            <i class="mdui-icon material-icons">delete</i>
-                        </button>
-                        <button class="mdui-fab mdui-fab-mini mdui-ripple mdui-color-teal"
-                            mdui-dialog="{target: '#search'}">
-                            <i class="mdui-icon material-icons">search</i>
-                        </button>
-                        <button class="mdui-fab mdui-fab-mini mdui-ripple mdui-color-blue-grey"
-                            mdui-dialog="{target: '#refresh'}">
-                            <i class="mdui-icon material-icons">autorenew</i>
-                        </button>
-                        <button class="mdui-fab mdui-fab-mini mdui-ripple mdui-color-purple" onclick="share()">
-                            <i class="mdui-icon material-icons">share</i>
-                        </button>
-                        <a class="mdui-fab mdui-fab-mini mdui-ripple mdui-color-indigo" href="/user/azure/create">
-                            <i class="mdui-icon material-icons">add</i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mdui-m-t-2"></div>
-
-        </div>
-    </div>
-    </br />
+<div class="mb-4 flex flex-wrap gap-2">
+  <a href="/user/azure/create" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    添加账户
+  </a>
+  <button id="btn-refresh-all" class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-xl border border-gray-300 transition-colors">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    批量刷新
+  </button>
+  <button id="btn-del-disabled" class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-red-50 text-red-600 text-sm font-medium rounded-xl border border-red-200 transition-colors">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    清理禁用账户
+  </button>
 </div>
-</body>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">账户</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">备注</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">状态</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">类型</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">VM 数</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">添加时间</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-600">操作</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100" id="account-tbody">
+        {volist name="accounts" id="account"}
+        <tr id="row-{$account.id}" class="hover:bg-gray-50 transition-colors">
+          <td class="px-4 py-3">
+            <div class="font-medium text-gray-900 text-xs">{$account.az_email}</div>
+          </td>
+          <td class="px-4 py-3 text-gray-500 text-xs">{$account.user_mark ?? '—'}</td>
+          <td class="px-4 py-3">
+            {if $account.az_sub_status == 'Enabled'}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Enabled</span>
+            {elseif $account.az_sub_status}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">{$account.az_sub_status}</span>
+            {else}
+            <span class="text-gray-400 text-xs">—</span>
+            {/if}
+          </td>
+          <td class="px-4 py-3 text-gray-600 text-xs">{$account.az_sub_type ?? '—'}</td>
+          <td class="px-4 py-3 text-gray-600">{:app\model\AzureServer::where('account_id', $account.id)->count()}</td>
+          <td class="px-4 py-3 text-gray-400 text-xs">{:date('Y-m-d', $account.created_at)}</td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-1 flex-wrap">
+              <a href="/user/azure/{$account.id}/edit" class="px-2.5 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">编辑</a>
+              <a href="/user/azure/{$account.id}" class="px-2.5 py-1 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">订阅</a>
+              <a href="/user/server/azure/create?id={$account.id}" class="px-2.5 py-1 text-xs font-medium bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors">创建VM</a>
+              <button onclick="refreshAccount({$account.id})" class="px-2.5 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">刷新</button>
+              <button onclick="updateAccount({$account.id})" class="px-2.5 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">同步</button>
+              <button onclick="removeAccount({$account.id})" class="px-2.5 py-1 text-xs font-medium bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors">删除</button>
+            </div>
+          </td>
+        </tr>
+        {/volist}
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <script>
-    var inst = new mdui.Fab('#fab');
-
-    $('#submit-search').click(function () {
-        $.ajax({
-            method: 'POST',
-            url: "/user/azure/search",
-            data: {
-                s_name: $('#s_name').val(),
-                s_mark: $('#s_mark').val(),
-                s_type: $('#s_type').val(),
-                s_status: $('#s_status').val(),
-            },
-            dataType: "json",
-            success: function (data) {
-                $("tr[class='hid']").hide();
-                for (var i = 0; i < data.result.length; i++) {
-                    $("tr[id='" + data.result[i].id + "']").show();
-                }
-                // console.log(data.sql);
-            }
-        });
-    });
-
-    $('#submit-refresh').click(function () {
-        var type = [];
-        $("input[name='account_type']:checked").each(function (i) {
-            type[i] = $(this).val();
-        });
-
-        var action = [];
-        $("input[name='refresh_action']:checked").each(function (i) {
-            action[i] = $(this).val();
-        });
-
-        //console.log(type)
-        //console.log(action)
-
-        var load = new mdui.alert('<p id=\"hint\">准备中</p><div class=\"mdui-progress\"><div class=\"mdui-progress-determinate\"></div></div>', '进行中');
-        var cycle = setInterval(getProgress, 500);
-        uuid = guid();
-
-        $.ajax({
-            method: 'POST',
-            url: "/user/azure/refresh",
-            data: {
-                type: type,
-                action: action,
-                task_uuid: uuid,
-            },
-            dataType: "json",
-            success: function (data) {
-                load.close();
-                clearInterval(cycle);
-                if (data.status == '0') {
-                    mdui.alert(data.content, data.title);
-                } else {
-                    mdui.alert(data.content, data.title);
-                    setTimeout("window.location = '/user/azure'", 1500);
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                clearInterval(cycle);
-                console.log('false');
-            }
-        });
-    });
-
-    function guid() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-
-    function update(that) {
-        let id = $(that).data('id');
-        mdui.confirm('此操作将获取账户下所有虚拟机，并将未在列表中列出的虚拟机加入到列表中。是否继续？', '更新确认',
-            function () {
-                var load = new mdui.alert('<div class=\"mdui-progress\"><div class=\"mdui-progress-indeterminate\"></div></div>', '进行中');
-                $.ajax({
-                    method: 'POST',
-                    url: "/user/azure/update/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        load.close();
-                        mdui.alert(data.content, data.title);
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function remove(that) {
-        let id = $(that).data('id');
-        mdui.confirm('删除此账户时，也将从虚拟机列表中移除归属于此账户下的虚拟机。<span style="color: red">由于在删除时要进行数据统计，耗时将相较之前有延长</span>。是否继续？', '删除确认',
-            function () {
-                var load = new mdui.alert('<div class=\"mdui-progress\"><div class=\"mdui-progress-indeterminate\"></div></div>', '进行中');
-                $.ajax({
-                    method: 'DELETE',
-                    url: "/user/azure/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        load.close();
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            $(that).closest('tr').remove();
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function refresh(that) {
-        let id = $(that).data('id');
-        mdui.confirm('确认刷新此订阅状态么？', '刷新确认',
-            function () {
-                $.ajax({
-                    method: 'POST',
-                    url: "/user/azure/refresh/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function estimatedCost(that) {
-        let id = $(that).data('id');
-        mdui.confirm('此功能会先筛选出在虚拟机列表中归属于此账户的虚拟机，然后获取自虚拟机创建以来的所有入向流量数据，再通过对照虚拟机规格价目表，预估此账户的累计账单金额（仅包含虚拟机规格费和流量费）。请注意：<ul><li>如果你曾使用官方面板或其他面板创建了本面板没有收录的虚拟机规格，统计数据将缺少虚拟机费用的数据</li><li>由于不统计其他可能收费项目，预估的数据与真实数据将存在偏差，因此仅供参考</li><li>不能统计曾创建过，但现在已经删除的虚拟机产生的相关费用</li><li>流量费用按照 $0.08/GB 计算，预估费用货币为 USD</li><li>教育账户的两个免费虚拟机将参与统计</li><li>若虚拟机数目多，统计花费时间较长</li><ul>', '预估费用',
-            function () {
-                var load = new mdui.alert('<div class=\"mdui-progress\"><div class=\"mdui-progress-indeterminate\"></div></div>', '进行中');
-                $.ajax({
-                    method: 'POST',
-                    url: "/user/azure/cost/" + id,
-                    dataType: "json",
-                    success: function (data) {
-                        load.close();
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function deletedAllDisabledAccount() {
-        mdui.confirm('此操作将移除所有 <span class="mdui-typo"><code>Warned</code> 和 <code>Disabled</code></span> 状态的账户，以及在虚拟机列表中归属于这些账户下的虚拟机。<span style="color: red">由于在删除时要进行数据统计，耗时将相较之前有延长</span>。是否继续？', '批量删除确认',
-            function () {
-                var load = new mdui.alert('<div class=\"mdui-progress\"><div class=\"mdui-progress-indeterminate\"></div></div>', '进行中');
-                $.ajax({
-                    method: 'DELETE',
-                    url: "/user/azure/disabled",
-                    dataType: "json",
-                    success: function (data) {
-                        load.close();
-                        mdui.alert(data.content, data.title);
-                        if (data.status == '1') {
-                            setTimeout("window.location = '/user/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
-    function share() {
-        var set = [];
-        $('.mdui-table-row-selected').each(function () {
-            var id = $(this).attr('data-id');
-            set.push(id);
-        });
-
-        if (set.length == 0) {
-            return mdui.alert('请先勾选一个或多个账户的复选框', '分享失败');
-        }
-
-        mdui.confirm('选中的账户将从当前面板移除，同时生成一个分享链接。其他人可通过此链接快速导入当前选中的账户', '创建分享链接',
-            function () {
-                $.ajax({
-                    method: 'PUT',
-                    url: "/user/azure/share",
-                    dataType: "json",
-                    data: {
-                        account_set: set,
-                    },
-                    success: function (data) {
-                        mdui.alert(data.content, data.title, function () {
-                            // https://www.zhangxinxu.com/wordpress/2021/10/js-copy-paste-clipboard/
-                            navigator.clipboard.writeText(data.share_link);
-                        },
-                            {
-                                confirmText: "复制并关闭",
-                            }
-                        );
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-
-        // console.log(set);
-    };
-
-    function getProgress() {
-        $.ajax({
-            method: 'GET',
-            url: "/user/progress/" + uuid,
-            dataType: "json",
-            success: function (data) {
-                var width = data.schedule + '%';
-                $('.mdui-progress-determinate').css('width', width);
-                $('#hint').replaceWith("<p id=\"hint\">" + data.current + "</p>");
-            }
-        });
-    }
-
-    $("td:contains('Enabled')").css("color", "green");
-    $("td:contains('Disabled')").css("color", "red");
-    $("td:contains('Invalid')").css("color", "red");
-    $("td:contains('Warned')").css("color", "red");
+function refreshAccount(id) {
+  azConfirm('确认刷新此订阅状态？','刷新确认').then(function(){
+    var prog=azProgress('刷新中');
+    $.ajax({method:'POST',url:'/user/azure/refresh/'+id,dataType:'json',
+      success:function(d){prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1000);}});
+  }).catch(function(){});
+}
+function updateAccount(id) {
+  azConfirm('将获取账户下所有虚拟机并同步到列表，是否继续？','同步确认').then(function(){
+    var prog=azProgress('同步中');
+    $.ajax({method:'POST',url:'/user/azure/update/'+id,dataType:'json',
+      success:function(d){prog.close();toast(d.content,d.status=='1'?'success':'error');}});
+  }).catch(function(){});
+}
+function removeAccount(id) {
+  azDanger('删除账户将同时移除该账户下的所有虚拟机记录，是否继续？','删除确认','删除','取消').then(function(){
+    var prog=azProgress('删除中');
+    $.ajax({method:'DELETE',url:'/user/azure/'+id,dataType:'json',
+      success:function(d){prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')$('#row-'+id).remove();}});
+  }).catch(function(){});
+}
+$('#btn-refresh-all').on('click',function(){
+  azConfirm('批量刷新所有账户的订阅状态？','批量刷新').then(function(){
+    var prog=azProgress('批量刷新中');
+    var uuid2=guid();
+    var cycle=setInterval(function(){$.ajax({method:'GET',url:'/user/progress/'+uuid2,dataType:'json',success:function(d){prog.setProgress(d.schedule);prog.setHint(d.current);}});},800);
+    $.ajax({method:'POST',url:'/user/azure/refresh',data:{type:['PayAsYouGo','FreeTrial','Students','Unknown'],action:['status'],task_uuid:uuid2},dataType:'json',
+      success:function(d){clearInterval(cycle);prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1000);}});
+  }).catch(function(){});
+});
+$('#btn-del-disabled').on('click',function(){
+  azDanger('将删除所有 Warned 和 Disabled 状态的账户及其虚拟机记录，是否继续？','批量删除','删除','取消').then(function(){
+    var prog=azProgress('删除中');
+    $.ajax({method:'DELETE',url:'/user/azure/disabled',dataType:'json',
+      success:function(d){prog.close();toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1000);}});
+  }).catch(function(){});
+});
 </script>
-{include file="../app/view/user/footer.html" /}
 
-</html>
+{include file="../app/view/user/footer.html" /}

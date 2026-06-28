@@ -1,238 +1,130 @@
 {include file="../app/view/user/header.html" title="账户资料" /}
 
-<div class="mdui-container-fluid">
-    <div class="mdui-row">
-        <div
-            class="mdui-col-xs-12 mdui-col-md-{:think\\facade\\Env::get('theme.CARD_WIDTH')} mdui-col-offset-md-{:think\\facade\\Env::get('theme.CARD_RIGHT_OFFSET')}">
-            <div class="mdui-container-fluid">
-                <p style="color: #3F51B5; font-size: 34px">账户资料</p>
-            </div>
-
-            <div class="mdui-typo">
-                <p>可在此设置推送接收，修改密码，以及个人偏好</p>
-            </div>
-
-            <div class="mdui-card mdui-col-md-12 mdui-m-t-2" style="overflow: visible">
-                <div class="mdui-card-content">
-                    <!-- 导航栏开始 -->
-                    <div class="mdui-tab" mdui-tab>
-                        <a href="#personalize-config" class="mdui-ripple">
-                            <i class="mdui-icon material-icons">perm_contact_calendar</i>
-                            <label>个人偏好</label>
-                        </a>
-                        <a href="#push-receive" class="mdui-ripple">
-                            <i class="mdui-icon material-icons">message</i>
-                            <label>推送接收</label>
-                        </a>
-                        <a href="#change-password" class="mdui-ripple">
-                            <i class="mdui-icon material-icons">lock</i>
-                            <label>密码修改</label>
-                        </a>
-                    </div>
-                    <!-- 推送接收 -->
-                    <div id="push-receive">
-                        <div class="mdui-textfield mdui-textfield-floating-label mdui-col-md-6">
-                            <i class="mdui-icon material-icons">email</i>
-                            <label class="mdui-textfield-label">接收邮箱</label>
-                            <textarea class="mdui-textfield-input"
-                                id="user_email">{$profile.notify_email ?? ''}</textarea>
-                        </div>
-
-                        <button id="update_notify"
-                            class="mdui-m-t-2 mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-indigo mdui-ripple">保存
-                        </button>
-                    </div>
-                    <!-- 密码修改 -->
-                    <div id="change-password">
-                        <div class="mdui-textfield mdui-textfield-floating-label mdui-col-md-4">
-                            <i class="mdui-icon material-icons">vpn_key</i>
-                            <label class="mdui-textfield-label">当前的登录密码</label>
-                            <input class="mdui-textfield-input" type="password" id="now_passwd" required>
-                        </div>
-                        <div class="mdui-textfield mdui-textfield-floating-label mdui-col-md-4">
-                            <i class="mdui-icon material-icons">assistant</i>
-                            <label class="mdui-textfield-label">想要设置的新密码</label>
-                            <input class="mdui-textfield-input" type="password" id="new_passwd" required>
-                        </div>
-                        <div class="mdui-textfield mdui-textfield-floating-label mdui-col-md-4">
-                            <i class="mdui-icon material-icons">assignment_turned_in</i>
-                            <label class="mdui-textfield-label">再次输入新密码</label>
-                            <input class="mdui-textfield-input" type="password" id="again_passwd" required>
-                        </div>
-
-                        <button id="update_passwd"
-                            class="mdui-m-t-2 mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-indigo mdui-ripple">修改
-                        </button>
-                    </div>
-                    <!-- 个性化设置 -->
-                    <div id="personalize-config">
-                        <div class="mdui-textfield mdui-textfield-floating-label mdui-col-md-6">
-                            <i class="mdui-icon material-icons">assignment_ind</i>
-                            <label class="mdui-textfield-label">默认登录账户</label>
-                            <input class="mdui-textfield-input" id="vm_default_identity"
-                                value="{$personalise.vm_default_identity}">
-                        </div>
-                        <div class="mdui-textfield mdui-textfield-floating-label mdui-col-md-6">
-                            <i class="mdui-icon material-icons">vpn_key</i>
-                            <label class="mdui-textfield-label">默认登录密码</label>
-                            <input class="mdui-textfield-input" id="vm_default_credentials"
-                                value="{$personalise.vm_default_credentials}">
-                        </div>
-                        <div class="mdui-textfield mdui-textfield-floating-label mdui-col-md-6">
-                            <i class="mdui-icon material-icons">code</i>
-                            <label class="mdui-textfield-label">Linux 默认脚本</label>
-                            <textarea class="mdui-textfield-input" id="vm_default_script"
-                                rows="11">{$personalise.vm_default_script ?? ''}</textarea>
-                        </div>
-                        <div class="mdui-m-t-2 mdui-col-md-6">
-                            地区：<select id="vm_location" class="mdui-select" mdui-select>
-                                {volist name="locations" id="location"}
-                                <option value="{$key}">{$location}</option>
-                                {/volist}
-                            </select>
-                        </div>
-                        <div class="mdui-m-t-2 mdui-col-md-6">
-                            规格：<select id="vm_size" class="mdui-select" mdui-select>
-                                {volist name="sizes" id="size"}
-                                <option value="{$key}">
-                                    {:str_replace('Standard_', '', $key)} {$size.cpu}C_{$size.memory}G
-                                    ({:round($size.cost, 1)} USD /
-                                    Month)
-                                </option>
-                                {/volist}
-                            </select>
-                        </div>
-                        <div class="mdui-m-t-2 mdui-col-md-6">
-                            存储：<select id="vm_disk_size" class="mdui-select" mdui-select>
-                                {foreach $disk_sizes as $disk_size}
-                                <option value="{$disk_size}">{$disk_size} GB</option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <div class="mdui-m-t-2 mdui-col-md-6">
-                            镜像：<select id="vm_image" class="mdui-select" mdui-select>
-                                {volist name="images" id="image"}
-                                <option value="{$key}">{$image.display}</option>
-                                {/volist}
-                            </select>
-                        </div>
-                        <div class="mdui-col-md-12">
-                            <p class="mdui-col-md-12 mdui-typo">* 默认脚本的运行身份是普通用户，部分命令需要加上 <code>sudo</code> 才能成功执行</p>
-                        </div>
-
-                        <button id="update_personalise"
-                            class="mdui-m-t-3 mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-indigo mdui-ripple">提交
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-    <br />
+<!-- Tabs -->
+<div class="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
+  <button class="tab-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all" data-tab="personalize">个人偏好</button>
+  <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-tab="notify">推送接收</button>
+  <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all" data-tab="passwd">修改密码</button>
 </div>
-</body>
+
+<!-- 个人偏好 -->
+<div id="tab-personalize" class="tab-pane bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">默认登录账户</label>
+      <input id="vm_default_identity" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="{$personalise.vm_default_identity}"/>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">默认登录密码</label>
+      <input id="vm_default_credentials" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="{$personalise.vm_default_credentials}"/>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">默认地区</label>
+      <select id="vm_location" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {volist name="locations" id="location"}
+        <option value="{$key}">{$location}</option>
+        {/volist}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">默认规格</label>
+      <select id="vm_size" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {volist name="sizes" id="size"}
+        <option value="{$key}">{:str_replace('Standard_','',$key)} {$size.cpu}C_{$size.memory}G ({:round($size.cost,1)} USD/mo)</option>
+        {/volist}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">默认存储</label>
+      <select id="vm_disk_size" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {foreach $disk_sizes as $disk_size}
+        <option value="{$disk_size}">{$disk_size} GB</option>
+        {/foreach}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">默认镜像</label>
+      <select id="vm_image" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {volist name="images" id="image"}
+        <option value="{$key}">{$image.display}</option>
+        {/volist}
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium text-gray-700 mb-1">默认启动脚本</label>
+      <textarea id="vm_default_script" rows="6" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500">{$personalise.vm_default_script ?? ''}</textarea>
+      <p class="text-xs text-gray-400 mt-1">脚本以普通用户身份运行，需要 root 权限的命令请加 <code>sudo</code></p>
+    </div>
+  </div>
+  <button id="update_personalise" class="mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors">保存偏好</button>
+</div>
+
+<!-- 推送接收 -->
+<div id="tab-notify" class="tab-pane hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div class="max-w-md">
+    <label class="block text-sm font-medium text-gray-700 mb-1">接收邮箱</label>
+    <input id="user_email" type="email" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="{$profile.notify_email ?? ''}"/>
+    <button id="update_notify" class="mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors">保存</button>
+  </div>
+</div>
+
+<!-- 修改密码 -->
+<div id="tab-passwd" class="tab-pane hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div class="max-w-md space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">当前密码</label>
+      <input id="now_passwd" type="password" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">新密码</label>
+      <input id="new_passwd" type="password" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">确认新密码</label>
+      <input id="again_passwd" type="password" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+    <button id="update_passwd" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors">修改密码</button>
+  </div>
+</div>
 
 <script>
-    $('#update_notify').on('click', function () {
-        mdui.confirm('确认应用这些信息么？', '修改推送',
-            function () {
-                $.ajax({
-                    method: 'PUT',
-                    url: "/user/profile/notify",
-                    data: {
-                        user_email: $('#user_email').val(),
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/profile'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    });
+/* Tabs */
+$('.tab-btn').on('click',function(){
+  $('.tab-btn').removeClass('active bg-white shadow-sm text-gray-900').addClass('text-gray-500');
+  $(this).addClass('active bg-white shadow-sm text-gray-900').removeClass('text-gray-500');
+  $('.tab-pane').addClass('hidden');
+  $('#tab-'+$(this).data('tab')).removeClass('hidden');
+});
+$('.tab-btn.active').addClass('bg-white shadow-sm text-gray-900');
+$('.tab-btn:not(.active)').addClass('text-gray-500');
 
-    $('#update_passwd').on('click', function () {
-        mdui.confirm('确认修改登录密码么？', '修改密码',
-            function () {
-                $.ajax({
-                    method: 'PUT',
-                    url: "/user/profile/passwd",
-                    data: {
-                        now_passwd: $('#now_passwd').val(),
-                        new_passwd: $('#new_passwd').val(),
-                        again_passwd: $('#again_passwd').val()
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/profile'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    });
+/* Set defaults */
+$('#vm_size').val('{$personalise.vm_size}');
+$('#vm_image').val('{$personalise.vm_image}');
+$('#vm_location').val('{$personalise.vm_location}');
+$('#vm_disk_size').val('{$personalise.vm_disk_size}');
 
-    $('#update_personalise').on('click', function () {
-        mdui.confirm('确认应用这些偏好么？', '修改偏好',
-            function () {
-                $.ajax({
-                    method: 'PUT',
-                    url: "/user/profile/personalise",
-                    data: {
-                        vm_size: $('#vm_size').val(),
-                        vm_image: $('#vm_image').val(),
-                        vm_location: $('#vm_location').val(),
-                        vm_disk_size: $('#vm_disk_size').val(),
-                        vm_default_script: $('#vm_default_script').val(),
-                        vm_default_identity: $('#vm_default_identity').val(),
-                        vm_default_credentials: $('#vm_default_credentials').val(),
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.status == '0') {
-                            mdui.alert(data.content, data.title);
-                        } else {
-                            mdui.alert(data.content, data.title);
-                            setTimeout("window.location = '/user/profile'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    });
+$('#update_notify').on('click',function(){
+  azConfirm('确认修改推送邮箱？','修改推送').then(function(){
+    $.ajax({method:'PUT',url:'/user/profile/notify',data:{user_email:$('#user_email').val()},dataType:'json',
+      success:function(d){toast(d.content,d.status=='1'?'success':'error');if(d.status=='1')setTimeout(function(){location.reload();},1200);}});
+  }).catch(function(){});
+});
 
-    $("#vm_size").prop('value', '{$personalise.vm_size}');
-    $("#vm_image").prop('value', '{$personalise.vm_image}');
-    $("#vm_location").prop('value', '{$personalise.vm_location}');
-    $("#vm_disk_size").prop('value', '{$personalise.vm_disk_size}');
-    $("#vm_default_identity").prop('value', '{$personalise.vm_default_identity}');
-    $("#vm_default_credentials").prop('value', '{$personalise.vm_default_credentials}');
+$('#update_passwd').on('click',function(){
+  azConfirm('确认修改登录密码？','修改密码').then(function(){
+    $.ajax({method:'PUT',url:'/user/profile/passwd',data:{now_passwd:$('#now_passwd').val(),new_passwd:$('#new_passwd').val(),again_passwd:$('#again_passwd').val()},dataType:'json',
+      success:function(d){toast(d.content,d.status=='1'?'success':'error');}});
+  }).catch(function(){});
+});
+
+$('#update_personalise').on('click',function(){
+  $.ajax({method:'PUT',url:'/user/profile/personalise',data:{
+    vm_size:$('#vm_size').val(),vm_image:$('#vm_image').val(),vm_location:$('#vm_location').val(),
+    vm_disk_size:$('#vm_disk_size').val(),vm_default_script:$('#vm_default_script').val(),
+    vm_default_identity:$('#vm_default_identity').val(),vm_default_credentials:$('#vm_default_credentials').val()
+  },dataType:'json',success:function(d){toast(d.content,d.status=='1'?'success':'error');}});
+});
 </script>
-{include file="../app/view/user/footer.html" /}
 
-</html>
+{include file="../app/view/user/footer.html" /}
