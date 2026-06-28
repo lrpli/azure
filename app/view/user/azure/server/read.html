@@ -202,30 +202,6 @@
                     </div>
                 </div>
 
-                <div class="mdui-col-md-6 mdui-col-sm-12 mdui-m-t-2">
-                    <div class="mdui-card" style="overflow: visible">
-                        <div class="mdui-card-content">
-                            <p style="color: #3F51B5; font-size: 18px">
-                                <i class="mdui-icon material-icons">tune</i>&nbsp;流量控制规则
-                            </p>
-                            <div class="mdui-typo">
-                                <div class="mdui-m-t-2">
-                                    规格：<select id="traffic_rule" class="mdui-select" mdui-select>
-                                        <option value="0">不使用</option>
-                                        {volist name="traffic_rules" id="traffic_rule"}
-                                        <option value="{$traffic_rule->id}">{$traffic_rule->name}</option>
-                                        {/volist}
-                                    </select>
-                                </div>
-                                <div class="mdui-m-t-2">
-                                    <button onclick="apply(this)" data-id="{$server->vm_id}"
-                                        class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-ripple mdui-color-blue-grey">应用
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="mdui-container">
@@ -400,35 +376,7 @@
         );
     };
 
-    function apply(that) {
-        mdui.confirm('确认使用此流量控制规则么', '应用确认',
-            function () {
-                var uuid = $(that).data('id');
-                $.ajax({
-                    method: 'PUT',
-                    url: "/user/server/azure/rule/" + uuid,
-                    data: {
-                        traffic_rule: $('#traffic_rule').val(),
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        mdui.alert(data.content, data.title);
-                        if (data.status == '1') {
-                            setTimeout("window.location = '/user/server/azure'", 1500);
-                        }
-                    }
-                });
-            },
-            function () { },
-            {
-                confirmText: "确定",
-                cancelText: "取消"
-            }
-        );
-    };
-
     $("#new_tier").prop('value', '{$vm_disk_tier}');
-    $("#traffic_rule").prop('value', '{$server->rule}');
     $("#new_size option[value='{$server->vm_size}']").attr('disabled', 'disabled');
 </script>
 {include file="../app/view/user/footer.html" /}

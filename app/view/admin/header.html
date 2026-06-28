@@ -7,10 +7,7 @@
     <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="/static/css/mdui.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap.css">
-    <link href="/static/prism/prism.css" rel="stylesheet" />
-    <script src="/static/prism/prism.js"></script>
     <script src="/static/js/mdui.min.js"></script>
-    <script src="/static/js/anychart-base.min.js"></script>
     <script src="/static/js/jquery-3.7.1.min.js"></script>
     <style type="text/css">
         td {
@@ -62,14 +59,6 @@
                     <a href="/admin/setting/custom" class="mdui-list-item mdui-ripple">
                         网站设置
                     </a>
-
-                    <a href="/admin/setting/resolv" class="mdui-list-item mdui-ripple">
-                        解析设置
-                    </a>
-
-                    <a href="/admin/setting/telegram" class="mdui-list-item mdui-ripple">
-                        Telegram Bot
-                    </a>
                 </div>
             </div>
 
@@ -118,24 +107,8 @@
                     <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
                 </div>
                 <div class="mdui-collapse-item-body mdui-list">
-                    <a href="/admin/log/task" class="mdui-list-item mdui-ripple">
-                        任务
-                    </a>
-
                     <a href="/admin/log/login" class="mdui-list-item mdui-ripple">
                         登录
-                    </a>
-
-                    <a href="/admin/log/verify" class="mdui-list-item mdui-ripple">
-                        验证码
-                    </a>
-
-                    <a href="/admin/log/resize" class="mdui-list-item mdui-ripple">
-                        升降配
-                    </a>
-
-                    <a href="/admin/log/traffic" class="mdui-list-item mdui-ripple">
-                        流量控制
                     </a>
                 </div>
             </div>
@@ -150,9 +123,6 @@
 
             <div class="mdui-typo mdui-m-a-2">
                 <span>v.{:app\\model\\Config::obtain('version')}</span>
-                <p class="mdui-float-right">
-                    <a href="https://github.com/azpanel/azpanel">Github</a>
-                </p>
             </div>
         </div>
     </div>

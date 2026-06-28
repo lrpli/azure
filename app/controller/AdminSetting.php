@@ -22,7 +22,7 @@ class AdminSetting extends AdminBase
         $class = input('class/s');
 
         if ($class === 'notify') {
-            $list = ['email_notify', 'telegram_notify'];
+            $list = ['email_notify'];
         } elseif ($class === 'register') {
             $list = ['allow_public_reg', 'reg_email_veriy'];
         } elseif ($class === 'verify') {
@@ -84,46 +84,6 @@ class AdminSetting extends AdminBase
         return json(Tools::msg('1', '发送结果', '发送成功'));
     }
 
-    public function telegramPushTest()
-    {
-        $recipient = input('recipient/s');
-
-        if ($recipient === '') {
-            return json(Tools::msg('0', '发送失败', '请填写收信用户 uid'));
-        }
-
-        try {
-            Notify::telegram($recipient, '这是一条测试消息。如果你能收到，则可确认 Telegram 推送功能工作正常');
-        } catch (\Exception $e) {
-            return json(Tools::msg('0', '发送失败', $e->getMessage()));
-        }
-
-        return json(Tools::msg('1', '发送结果', '发送成功'));
-    }
-
-    public function telegramIndex()
-    {
-        View::assign('telegram', Config::group('telegram'));
-        return View::fetch('../app/view/admin/setting/telegram.html');
-    }
-
-    public function telegramSave()
-    {
-        $list = ['telegram_account', 'telegram_token'];
-
-        foreach ($list as $item) {
-            if ((string) input($item) === '') {
-                return json(Tools::msg('0', '保存失败', '请填写所有项目'));
-            }
-
-            $setting = Config::where('item', $item)->find();
-            $setting->value = input($item);
-            $setting->save();
-        }
-
-        return json(Tools::msg('1', '保存结果', '保存成功'));
-    }
-
     public function customIndex()
     {
         View::assign('custom', Config::group('custom'));
@@ -133,25 +93,6 @@ class AdminSetting extends AdminBase
     public function customSave()
     {
         $list = ['custom_text', 'custom_script'];
-
-        foreach ($list as $item) {
-            $setting = Config::where('item', $item)->find();
-            $setting->value = input($item);
-            $setting->save();
-        }
-
-        return json(Tools::msg('1', '保存结果', '保存成功'));
-    }
-
-    public function resolvIndex()
-    {
-        View::assign('config', Config::group('resolv'));
-        return View::fetch('../app/view/admin/setting/resolv.html');
-    }
-
-    public function resolvSave()
-    {
-        $list = ['ali_whitelist', 'resolv_sync', 'sync_immediately_after_creation', 'ali_domain', 'ali_ak', 'ali_sk', 'ali_ttl'];
 
         foreach ($list as $item) {
             $setting = Config::where('item', $item)->find();
