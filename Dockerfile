@@ -1,55 +1,51 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
-# 安装系统依赖和 PHP 扩展
-RUN apk add --no-cache \
+# 安装系统依赖（Debian 有预编译包，比 Alpine 快很多）
+RUN apt-get update && apt-get install -y --no-install-recommends \
         nginx \
         supervisor \
         curl \
-        git \
         unzip \
         libpng-dev \
         libzip-dev \
-        icu-dev \
-        oniguruma-dev \
-    && docker-php-ext-install \
+        libicu-dev \
+        libonig-dev \
+    && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         mbstring \
         gd \
         zip \
         intl \
         opcache \
-    && pecl install redis \
-    && docker-php-ext-enable redis
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # 安装 Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# 复制项目文件
+# 先复制 composer 文件，利用 Docker 层缓存
+COPY composer.json ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# 复制其余项目文件
 COPY . .
 
-# 安装 PHP 依赖
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# 运行 composer scripts（service:discover 等）
+RUN composer run-script post-autoload-dump || true
 
 # 设置目录权限
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 777 /var/www/html/runtime \
-    && chmod -R 777 /var/www/html/storage
+    && chmod -R 777 /var/www/html/runtime
 
-# Nginx 配置
+# 配置文件
 COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/default.conf /etc/nginx/http.d/default.conf
-
-# PHP-FPM 配置
+COPY docker/default.conf /etc/nginx/sites-enabled/default
 COPY docker/php.ini /usr/local/etc/php/conf.d/app.ini
-
-# Supervisor 配置（同时管理 nginx 和 php-fpm）
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh && rm -f /etc/nginx/sites-enabled/000-default* /etc/nginx/conf.d/default.conf 2>/dev/null || true
 
 EXPOSE 80
 
