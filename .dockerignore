@@ -1,0 +1,14 @@
+.git
+.env
+.env.docker
+runtime/log
+runtime/session
+runtime/temp
+runtime/cache
+vendor
+*.md
+images/
+docker-compose.yml
+.travis.yml
+phpstan.neon
+phpinsights.php
