@@ -32,8 +32,9 @@ services:
       - db_data:/var/lib/mysql
       - ./database/azure.sql:/docker-entrypoint-initdb.d/01_azure.sql:ro
       - ./database/config.sql:/docker-entrypoint-initdb.d/02_config.sql:ro
+      - ./database/seeds.sql:/docker-entrypoint-initdb.d/03_seeds.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "azpanel", "-pazpanel123"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "azpanel", "-p${DB_PASSWORD:-azpanel123}"]
       interval: 5s
       timeout: 5s
       retries: 10
