@@ -28,7 +28,7 @@ WORKDIR /var/www/html
 
 # 先复制 composer 文件，利用 Docker 层缓存
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
 
 # 复制其余项目文件
 COPY . .
