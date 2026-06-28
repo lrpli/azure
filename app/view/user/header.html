@@ -7,11 +7,7 @@
     <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="/static/css/mdui.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap.css">
-    <link href="/static/prism/prism.css" rel="stylesheet" />
-    <!-- <link href="/static/css/materialdesignicons.min.css" rel="stylesheet" /> -->
-    <script src="/static/prism/prism.js"></script>
     <script src="/static/js/mdui.min.js"></script>
-    <script src="/static/js/anychart-base.min.js"></script>
     <script src="/static/js/clipboard.min.js"></script>
     <script src="/static/js/jquery-3.7.1.js"></script>
     <style type="text/css">
@@ -69,14 +65,6 @@
                     <a href="/user/azure/create" class="mdui-list-item mdui-ripple">
                         添加账户
                     </a>
-
-                    <a href="/user/recycle" class="mdui-list-item mdui-ripple">
-                        回收站
-                    </a>
-
-                    <a href="/user/share" class="mdui-list-item mdui-ripple">
-                        分享
-                    </a>
                 </div>
             </div>
 
@@ -101,61 +89,6 @@
             <div class="mdui-typo">
                 <hr />
             </div>
-            <div class="mdui-collapse-item">
-                <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
-                    <i
-                        class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-blue-grey">supervisor_account</i>
-                    <div class="mdui-list-item-content">AWS 账户</div>
-                    <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
-                </div>
-
-                <div class="mdui-collapse-item-body mdui-list">
-                    <a href="/user/aws" class="mdui-list-item mdui-ripple">
-                        账户列表
-                    </a>
-                    <a href="/user/aws/create" class="mdui-list-item mdui-ripple">
-                        添加账户
-                    </a>
-                </div>
-            </div>
-            <div class="mdui-collapse-item">
-                <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
-                    <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-blue-grey">memory</i>
-                    <div class="mdui-list-item-content">AWS 虚拟机</div>
-                    <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
-                </div>
-
-                <div class="mdui-collapse-item-body mdui-list">
-                    <a href="/user/server/aws" class="mdui-list-item mdui-ripple">
-                        列表
-                    </a>
-                    <a href="/user/server/aws/create" class="mdui-list-item mdui-ripple">
-                        创建虚拟机
-                    </a>
-                </div>
-            </div>
-            <div class="mdui-typo">
-                <hr />
-            </div>
-
-            <div class="mdui-collapse-item">
-                <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
-                    <i
-                        class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-blue-grey">directions_boat</i>
-                    <div class="mdui-list-item-content">流量控制</div>
-                    <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
-                </div>
-
-                <div class="mdui-collapse-item-body mdui-list">
-                    <a href="/user/server/azure/rule" class="mdui-list-item mdui-ripple">
-                        规则
-                    </a>
-
-                    <a href="/user/server/azure/rule/log" class="mdui-list-item mdui-ripple">
-                        日志
-                    </a>
-                </div>
-            </div>
 
             <div class="mdui-collapse-item">
                 <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
@@ -174,23 +107,6 @@
                 </div>
             </div>
 
-            <div class="mdui-collapse-item">
-                <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
-                    <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-blue-grey">widgets</i>
-                    <div class="mdui-list-item-content">关于项目</div>
-                    <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
-                </div>
-                <div class="mdui-collapse-item-body mdui-list">
-                    <a href="/user/license" class="mdui-list-item mdui-ripple">
-                        开源协议
-                    </a>
-
-                    <a href="/user/docs" class="mdui-list-item mdui-ripple">
-                        使用文档
-                    </a>
-                </div>
-            </div>
-
             {if session('is_admin') == 1}
             <a href="/admin" class="mdui-list-item mdui-ripple">
                 进入管理后台
@@ -203,9 +119,6 @@
 
             <div class="mdui-typo mdui-m-a-2">
                 <span>v.{:app\\model\\Config::obtain('version')}</span>
-                <p class="mdui-float-right">
-                    <a href="https://github.com/azpanel/azpanel">Github</a>
-                </p>
             </div>
         </div>
     </div>

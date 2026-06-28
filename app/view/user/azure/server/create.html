@@ -141,28 +141,6 @@
                             </div>
                         </div>
                         <div class="mdui-row">
-                            <div class="mdui-col-sm-12 mdui-col-md-12">
-                                <div class="mdui-m-t-2">
-                                    流控：
-                                    <select id="vm_traffic_rule" class="mdui-select" mdui-select>
-                                        <option value="0">不使用</option>
-                                        {volist name="traffic_rules" id="traffic_rule"}
-                                        <option value="{$traffic_rule->id}">{$traffic_rule->name}</option>
-                                        {/volist}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mdui-col-sm-12 mdui-col-md-12">
-                                <div class="mdui-m-t-2">
-                                    密钥：
-                                    <select id="vm_ssh_key" class="mdui-select" mdui-select>
-                                        <option value="0">不使用</option>
-                                        {if !empty($ssh_key)}
-                                        <option value="{$ssh_key->id}">{$ssh_key->name}</option>
-                                        {/if}
-                                    </select>
-                                </div>
-                            </div>
                             <div class="mdui-col-sm-12 mdui-col-md-4">
                                 <div class="mdui-m-t-2">
                                     检查：
@@ -226,8 +204,6 @@
                                         <input class="mdui-textfield-input" type="text" id="socks5_passwd" />
                                     </div>
                                 </div>
-                                <button id="test_socks5"
-                                    class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-indigo mdui-m-p-2">测试</button>
                             </div>
                         </div>
                     </div>
@@ -310,39 +286,6 @@
             return v.toString(16);
         });
     }
-
-    $('#test_socks5').on('click', function () {
-        mdui.snackbar({
-            message: '正在测试代理可用性中...',
-            position: 'top',
-            timeout: '500',
-        });
-
-        localStorage.setItem('socks5_port', $('#socks5_port').val());
-        localStorage.setItem('socks5_address', $('#socks5_address').val());
-        localStorage.setItem('socks5_user', $('#socks5_user').val());
-        localStorage.setItem('socks5_passwd', $('#socks5_passwd').val());
-
-        $.ajax({
-            method: 'POST',
-            url: "/proxy/test",
-            data: {
-                socks5_port: $('#socks5_port').val(),
-                socks5_address: $('#socks5_address').val(),
-                socks5_user: $('#socks5_user').val(),
-                socks5_passwd: $('#socks5_passwd').val(),
-
-            },
-            dataType: "json",
-            success: function (data) {
-                mdui.snackbar({
-                    message: data.status ? data.msg : "代理不可用，请检查后重试：" + data.msg,
-                    position: 'top',
-                    timeout: data.status ? 1500 : 2500,
-                });
-            }
-        });
-    });
 
     $('#load_available_models').on('click', function () {
         mdui.snackbar({
@@ -454,8 +397,6 @@
                         vm_account: $('#vm_account').val(),
                         vm_disk_size: $('#vm_disk_size').val(),
                         vm_image: $('#vm_image').val(),
-                        vm_traffic_rule: $('#vm_traffic_rule').val(),
-                        vm_ssh_key: $('#vm_ssh_key').val(),
                         create_check: $('#create_check').val(),
                         create_ipv6: $('#create_ipv6').val(),
                         socks5_port: $('#socks5_port').val(),
