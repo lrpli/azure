@@ -5,7 +5,7 @@ services:
     ports:
       - "8080:80"
     environment:
-      - APP_DEBUG=false
+      - APP_DEBUG=true
       - APP_NAME=AzPanel
       - DB_HOSTNAME=db
       - DB_DATABASE=azpanel
